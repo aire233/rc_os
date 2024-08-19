@@ -1,24 +1,27 @@
-use core::alloc::{GlobalAlloc, Layout};
-use core::ptr::null_mut;
-use linked_list_allocator::LockedHeap;
+pub mod bump;
+pub mod linked_list;
+pub mod fixed_size_block;
+
+use crate::allocator::fixed_size_block::FixedSizeBlockAllocator;
 use x86_64::structures::paging::mapper::MapToError;
 use x86_64::structures::paging::{FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB};
 use x86_64::VirtAddr;
+// pub struct Dummy;
 
-pub struct Dummy;
-
-unsafe impl GlobalAlloc for Dummy {
-    unsafe fn alloc(&self, _layout: Layout) -> *mut u8 {
-        null_mut()
-    }
-
-    unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
-        panic!("dealloc should never be called")
-    }
-}
+// unsafe impl GlobalAlloc for Dummy {
+//     unsafe fn alloc(&self, _layout: Layout) -> *mut u8 {
+//         null_mut()
+//     }
+// 
+//     unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
+//         panic!("dealloc should never be called")
+//     }
+// }
 
 #[global_allocator]
-static ALLOCATOR: LockedHeap = LockedHeap::empty();
+static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(
+    FixedSizeBlockAllocator::new()
+);
 
 pub const HEAP_START: usize = 0x_4444_4444_0000;
 pub const HEAP_SIZE: usize = 100 * 1024; // 100 KiB
@@ -49,3 +52,36 @@ pub fn init_heap(
 
     Ok(())
 }
+
+/// A wrapper around spin::Mutex to permit trait implementations
+pub struct Locked<T> {
+    inner: spin::Mutex<T>,
+}
+
+impl<T> Locked<T> {
+    pub const fn new(inner: T) -> Self {
+        Locked {
+            inner: spin::Mutex::new(inner),
+        }
+    }
+
+    pub fn lock(&self) -> spin::MutexGuard<T> {
+        self.inner.lock()
+    }
+}
+
+/// Align the given address `addr` upwards to alignment `align`.
+///
+/// Requires that `align` is a power of two.
+fn align_up(addr: usize, align: usize) -> usize {
+    (addr + align - 1) & !(align - 1)
+}
+
+// fn align_up(addr: usize, align: usize) -> usize {
+//     let remainder = addr % align;
+//     if remainder == 0 {
+//         addr // addr is already aligned
+//     } else {
+//         addr - remainder + align
+//     }
+// }

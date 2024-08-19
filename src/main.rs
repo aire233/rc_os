@@ -6,10 +6,6 @@
 
 extern crate alloc;
 
-use alloc::boxed::Box;
-use alloc::rc::Rc;
-use alloc::vec;
-use alloc::vec::Vec;
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 use rc_os::println;
@@ -73,7 +69,7 @@ fn panic(info: &PanicInfo) -> ! {
 entry_point!(kernel_main);
 
 /// Entry point for the kernel
-fn kernel_main(boot_info: &'static BootInfo) -> ! {
+fn kernel_main(_boot_info: &'static BootInfo) -> ! {
     // this function is the entry point, since the linker looks for a function
     // named `_start` by default
     println!("Hello World{}", "!");

@@ -2,12 +2,9 @@
 #![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks)]
 #![feature(abi_x86_interrupt)]
+#![feature(const_mut_refs)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-
-extern crate alloc;
-
-use core::panic::PanicInfo;
 
 pub mod allocator;
 pub mod gdt;
@@ -15,6 +12,10 @@ pub mod interrupts;
 pub mod memory;
 pub mod serial;
 pub mod vga_buffer;
+
+extern crate alloc;
+
+use core::panic::PanicInfo;
 
 pub trait Testable {
     fn run(&self) -> ();
@@ -85,7 +86,7 @@ entry_point!(test_kernel_main);
 
 /// Entry point for the kernel
 #[cfg(test)]
-fn test_kernel_main(boot_info: &'static BootInfo) -> ! {
+fn test_kernel_main(_boot_info: &'static BootInfo) -> ! {
     init();
     test_main();
     hlt_loop();
