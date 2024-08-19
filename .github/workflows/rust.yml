@@ -23,9 +23,6 @@ jobs:
           toolchain: nightly
           override: true
 
-      - name: Add compilation target
-        run: rustup target add x86_64-rc_os
-
       - name: Build
         run: cargo build --verbose
 
