@@ -44,6 +44,19 @@ pub extern "C" fn _start() -> ! {
     // 
     // stack_overflow();
     
+    // let ptr = 0x20420c as *mut u8;
+    
+    // unsafe { let _x = *ptr; }
+    // println!("read worked"); // read from a code page
+
+    // unsafe { *ptr = 42; }
+    // println!("write worked"); // write to a code page
+    
+    // use x86_64::registers::control::Cr3;
+    // 
+    // let (level_4_page_table, _) = Cr3::read();
+    // println!("Level 4 page table at: {:?}", level_4_page_table.start_address());
+    
     #[cfg(test)]
     test_main();
 
