@@ -13,7 +13,7 @@ use core::panic::PanicInfo;
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    rc_os::hlt_loop();
 }
 
 #[cfg(test)]
@@ -28,27 +28,27 @@ pub extern "C" fn _start() -> ! {
     // named `_start` by default
     println!("Hello World{}", "!");
     // panic!("Some panic message");
-    
+
     rc_os::init();
-    
+
     // x86_64::instructions::interrupts::int3();  // invoke a breakpoint exception
-    
-    
+
+
     // unsafe {
     //     *(0xdeadbeef as *mut u8) = 42;    // trigger a page fault
     // }
-    
-    fn stack_overflow() {
-        stack_overflow();    // for each recursion, the return address is pushed
-    }
-    
-    stack_overflow();
+
+    // fn stack_overflow() {
+    //     stack_overflow();    // for each recursion, the return address is pushed
+    // }
+    // 
+    // stack_overflow();
     
     #[cfg(test)]
     test_main();
-    
+
     println!("It did not crash!");
-    loop {}
+    rc_os::hlt_loop();
 }
 
 #[test_case]
