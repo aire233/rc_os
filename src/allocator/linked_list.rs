@@ -1,5 +1,5 @@
-use core::alloc::{GlobalAlloc, Layout};
 use crate::allocator::{align_up, Locked};
+use core::alloc::{GlobalAlloc, Layout};
 use core::ptr;
 
 struct ListNode {
@@ -11,11 +11,11 @@ impl ListNode {
     const fn new(size: usize) -> Self {
         ListNode { size, next: None }
     }
-    
+
     fn start_addr(&self) -> usize {
         self as *const Self as usize
     }
-    
+
     fn end_addr(&self) -> usize {
         self.start_addr() + self.size
     }
@@ -60,9 +60,7 @@ impl LinkedListAllocator {
     /// it from the list.
     ///
     /// Returns a tuple of the list node and the start address of the allocation.
-    fn find_region(&mut self, size: usize, align: usize)
-                   -> Option<(&'static mut ListNode, usize)>
-    {
+    fn find_region(&mut self, size: usize, align: usize) -> Option<(&'static mut ListNode, usize)> {
         // reference to current list node, updated for each iteration
         let mut current = &mut self.head;
         // look for a large enough memory region in a linked list
@@ -87,9 +85,7 @@ impl LinkedListAllocator {
     /// alignment.
     ///
     /// Returns the allocation start address on success.
-    fn alloc_from_region(region: &ListNode, size: usize, align: usize)
-                         -> Result<usize, ()>
-    {
+    fn alloc_from_region(region: &ListNode, size: usize, align: usize) -> Result<usize, ()> {
         let alloc_start = align_up(region.start_addr(), align);
         let alloc_end = alloc_start.checked_add(size).ok_or(())?;
 

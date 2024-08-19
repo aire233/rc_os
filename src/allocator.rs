@@ -1,6 +1,6 @@
 pub mod bump;
-pub mod linked_list;
 pub mod fixed_size_block;
+pub mod linked_list;
 
 use crate::allocator::fixed_size_block::FixedSizeBlockAllocator;
 use x86_64::structures::paging::mapper::MapToError;
@@ -12,16 +12,14 @@ use x86_64::VirtAddr;
 //     unsafe fn alloc(&self, _layout: Layout) -> *mut u8 {
 //         null_mut()
 //     }
-// 
+//
 //     unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
 //         panic!("dealloc should never be called")
 //     }
 // }
 
 #[global_allocator]
-static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(
-    FixedSizeBlockAllocator::new()
-);
+static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(FixedSizeBlockAllocator::new());
 
 pub const HEAP_START: usize = 0x_4444_4444_0000;
 pub const HEAP_SIZE: usize = 100 * 1024; // 100 KiB
@@ -45,7 +43,7 @@ pub fn init_heap(
         let flags = PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
         unsafe { mapper.map_to(page, frame, flags, frame_allocator)?.flush() };
     }
-    
+
     unsafe {
         ALLOCATOR.lock().init(HEAP_START, HEAP_SIZE);
     }

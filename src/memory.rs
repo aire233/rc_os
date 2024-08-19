@@ -1,7 +1,5 @@
 use bootloader::bootinfo::MemoryMap;
-use x86_64::structures::paging::{
-    FrameAllocator, OffsetPageTable, PhysFrame, Size4KiB,
-};
+use x86_64::structures::paging::{FrameAllocator, OffsetPageTable, PhysFrame, Size4KiB};
 use x86_64::{structures::paging::PageTable, PhysAddr, VirtAddr};
 
 /// Initialize a new OffsetPageTable.
