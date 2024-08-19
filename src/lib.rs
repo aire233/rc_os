@@ -5,13 +5,16 @@
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+extern crate alloc;
+
 use core::panic::PanicInfo;
 
+pub mod allocator;
+pub mod gdt;
+pub mod interrupts;
+pub mod memory;
 pub mod serial;
 pub mod vga_buffer;
-pub mod interrupts;
-pub mod gdt;
-pub mod memory;
 
 pub trait Testable {
     fn run(&self) -> ();
