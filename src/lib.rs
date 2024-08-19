@@ -11,6 +11,7 @@ pub mod gdt;
 pub mod interrupts;
 pub mod memory;
 pub mod serial;
+pub mod task;
 pub mod vga_buffer;
 
 extern crate alloc;
@@ -86,7 +87,7 @@ entry_point!(test_kernel_main);
 
 /// Entry point for the kernel
 #[cfg(test)]
-fn test_kernel_main(_boot_info: &'static BootInfo) -> ! {
+fn test_kernel_main(boot_info: &'static BootInfo) -> ! {
     init();
     test_main();
     hlt_loop();

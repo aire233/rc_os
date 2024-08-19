@@ -9,6 +9,7 @@ extern crate alloc;
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 use rc_os::println;
+use rc_os::task::keyboard;
 
 // This function is called on panic.
 #[cfg(not(test))]
@@ -69,7 +70,7 @@ fn panic(info: &PanicInfo) -> ! {
 entry_point!(kernel_main);
 
 /// Entry point for the kernel
-fn kernel_main(_boot_info: &'static BootInfo) -> ! {
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
     // this function is the entry point, since the linker looks for a function
     // named `_start` by default
     println!("Hello World{}", "!");
@@ -158,39 +159,61 @@ fn kernel_main(_boot_info: &'static BootInfo) -> ! {
     // let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
     // unsafe { page_ptr.offset(400).write_volatile(0x_f021_f077_f065_f04e) };
 
-    // use rc_os::allocator;
-    // use rc_os::memory::{self, BootInfoFrameAllocator};
-    // use x86_64::VirtAddr;
-    //
-    // let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
-    // let mut mapper = unsafe { memory::init(phys_mem_offset) };
-    // let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
-    //
-    // allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
-    //
-    // // allocate a number on the heap
+    use rc_os::allocator;
+    use rc_os::memory::{self, BootInfoFrameAllocator};
+    use x86_64::VirtAddr;
+
+    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+    let mut mapper = unsafe { memory::init(phys_mem_offset) };
+    let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
+
+    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
+
+    // allocate a number on the heap
     // let heap_value = Box::new(41);
     // println!("heap_value at {:p}", heap_value);
-    //
-    // // create a dynamically sized vector
+
+    // create a dynamically sized vector
     // let mut vec = Vec::new();
     // for i in 0..500 {
     //     vec.push(i);
     // }
     // println!("vec at {:p}", vec.as_slice());
-    //
-    // // create a reference counted vector -> will be deallocated when count reaches 0
+
+    // create a reference counted vector -> will be deallocated when count reaches 0
     // let reference_counted = Rc::new(vec![1, 2, 3]);
     // let cloned_reference = reference_counted.clone();
     // println!("current reference count is {}", Rc::strong_count(&cloned_reference));
     // core::mem::drop(reference_counted);
     // println!("reference count is {} now", Rc::strong_count(&cloned_reference));
 
+    // use rc_os::task::{Task, simple_executor::SimpleExecutor};
+
+    // let mut executor = SimpleExecutor::new();
+    // executor.spawn(Task::new(example_task()));
+    // executor.run();
+
+    use rc_os::task::{executor::Executor, Task};
+
+    let mut executor = Executor::new();
+    executor.spawn(Task::new(example_task()));
+    executor.spawn(Task::new(keyboard::print_keypresses()));
+    executor.run();
+
     #[cfg(test)]
     test_main();
 
     println!("It did not crash!");
     rc_os::hlt_loop();
+}
+
+async fn async_number() -> u32 {
+    42
+}
+
+async fn example_task() {
+    let number = async_number().await;
+    println!("async number: {}", number);
 }
 
 #[test_case]
