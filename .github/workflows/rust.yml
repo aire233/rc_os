@@ -24,7 +24,7 @@ jobs:
           override: true
 
       - name: Install QEMU
-        run: sudo apt-get install -y qemu-system-x86
+        run: sudo apt-get install -y qemu-system
 
       - name: Install bootimage
         run: cargo install bootimage
