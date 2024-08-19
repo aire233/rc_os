@@ -8,7 +8,7 @@ use rc_os::println;
 use core::panic::PanicInfo;
 
 
-/// This function is called on panic.
+// This function is called on panic.
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
@@ -29,9 +29,25 @@ pub extern "C" fn _start() -> ! {
     println!("Hello World{}", "!");
     // panic!("Some panic message");
     
+    rc_os::init();
+    
+    // x86_64::instructions::interrupts::int3();  // invoke a breakpoint exception
+    
+    
+    // unsafe {
+    //     *(0xdeadbeef as *mut u8) = 42;    // trigger a page fault
+    // }
+    
+    fn stack_overflow() {
+        stack_overflow();    // for each recursion, the return address is pushed
+    }
+    
+    stack_overflow();
+    
     #[cfg(test)]
     test_main();
     
+    println!("It did not crash!");
     loop {}
 }
 
